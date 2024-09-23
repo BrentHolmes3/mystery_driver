@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<div style="margin-left: 100px; margin-right: 100px;">
+<head>
+    <title>Mystery Driver</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .violet {
+            background-color: violet;
+        }
+
+        .orange {
+            background-color: orange;
+        }
+
+        .green {
+            background-color: green;
+        }
+
+        .red {
+            background-color: red;
+        }
+        .lightblue {
+            background-color: lightblue;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align: center;">Mystery Driver</h1>
+    <form action="/submit" method="post">
+        <p>Guess an F1 Driver:</p>
+        <!-- Change the name attribute to "driver" -->
+        <input type="text" id="driverInput" name="driver" placeholder="Enter an F1 Driver." style="width:25%; height: 25px;" autofocus="autofocus">
+        <input type="submit" value="Submit">
+    </form>
+<br>
+
+<table>
+    <colgroup>
+        <col style="width: 20%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+    </colgroup>
+    <thead>
+        <tr>
+            <th>Driver</th>
+            <th>Car Number</th>
+            <th>Birth Year</th>
+            <th>Start Year</th>
+            <th>Number of Wins</th>
+            <th>Country</th>
+            <th>Team</th>
+            <!-- Add more headers for additional sentences -->
+        </tr>
+    </thead>
+    <tbody>
+        {% if result %}
+            {% for ele in result['message'] %}
+                <tr>
+                    <td>{{ ele.split('.')[0] }}</td>
+                    <td>{{ ele.split('.')[1] }}</td>
+                    <td>{{ ele.split('.')[2] }}</td>
+                    <td>{{ ele.split('.')[3] }}</td>
+                    <td>{{ ele.split('.')[4] }}</td>
+                    <td>{{ ele.split('.')[5] }}</td>
+                    <td>{{ ele.split('.')[6] }}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+
+
+    {% if error %}
+    <p>{{ error }}</p>
+    {% endif %}
+
+<script>
+    const inputElement = document.getElementById("driverInput");
+    const f1Drivers = [
+    "Stoffel Vandoorne",
+    "Logan Sargeant",
+    "Daniel Ricciardo",
+    "Max Chilton",
+    "Lando Norris",
+    "Sebastian Vettel",
+    "Nico Rosberg",
+    "Nicholas Latifi",
+    "Kimi Raikkonen",
+    "Romain Grosjean",
+    "Marcus Ericsson",
+    "Nikita Mazepin",
+    "Kamui Kobayashi",
+    "Pierre Gasly",
+    "Sergio Perez",
+    "Felipe Nasr",
+    "Pastor Maldonado",
+    "Fernando Alonso",
+    "Charles Leclerc",
+    "Jules Bianchi",
+    "Lance Stroll",
+    "Felipe Massa",
+    "Kevin Magnussen",
+    "Esteban Gutierrez",
+    "Nyck de Vries",
+    "Jenson Button",
+    "Yuki Tsunoda",
+    "Alexander Albon",
+    "Zhou Guanyu",
+    "Jean-Eric Vergne",
+    "Daniil Kvyat",
+    "Nico Hulkenberg",
+    "Will Stevens",
+    "Brendon Hartley",
+    "Jolyon Palmer",
+    "Esteban Ocon",
+    "Max Verstappen",
+    "Sergey Sirotkin",
+    "Oliver Bearman",
+    "Liam Lawson",
+    "Paul di Resta",
+    "Lewis Hamilton",
+    "Andre Lotterer",
+    "Mick Schumacher",
+    "Pietro Fittipaldi",
+    "Alexander Rossi",
+    "Carlos Sainz",
+    "George Russell",
+    "Valtteri Bottas",
+    "Oscar Piastri",
+    "Rio Haryanto",
+    "Robert Kubica",
+    "Jack Aitken",
+    "Pascal Wehrlein",
+    "Roberto Merhi",
+    "Adrian Sutil",
+    "Antonio Giovinazzi"
+    ];
+
+    let selectedDriverIndex = -1; // Initialize with -1 to indicate no selection
+
+    inputElement.addEventListener("input", function(event) {
+        const inputValue = event.target.value;
+        closeAllLists();
+
+        if (!inputValue) {
+            return;
+        }
+
+        const matchingDrivers = f1Drivers.filter(driver =>
+            driver.toLowerCase().includes(inputValue.toLowerCase())
+        );
+
+        if (matchingDrivers.length > 0) {
+            const suggestionContainer = document.createElement("div");
+            suggestionContainer.setAttribute("class", "autocomplete-items");
+            this.parentNode.appendChild(suggestionContainer);
+
+            matchingDrivers.forEach((driver, index) => {
+                const suggestionItem = document.createElement("div");
+                suggestionItem.textContent = driver;
+                suggestionItem.addEventListener("click", function() {
+                    inputElement.value = driver;
+                    closeAllLists();
+                });
+                suggestionItem.addEventListener("mouseover", function() {
+                    selectedDriverIndex = index; // Update selected index on mouseover
+                });
+                suggestionContainer.appendChild(suggestionItem);
+            });
+        }
+    });
+
+    inputElement.addEventListener("keydown", function(event) {
+        const suggestionItems = document.getElementsByClassName("autocomplete-items");
+        if (suggestionItems.length === 0) {
+            return;
+        }
+
+        if (event.key === "ArrowDown") {
+            event.preventDefault(); // Prevent default behavior (e.g., cursor moving to end of input)
+            selectedDriverIndex = (selectedDriverIndex + 1) % suggestionItems.length;
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault(); // Prevent default behavior (e.g., cursor moving to start of input)
+            selectedDriverIndex = (selectedDriverIndex - 1 + suggestionItems.length) % suggestionItems.length;
+        }
+
+        // Highlight the selected suggestion
+        for (let i = 0; i < suggestionItems.length; i++) {
+            suggestionItems[i].classList.remove("selected");
+        }
+        suggestionItems[selectedDriverIndex].classList.add("selected");
+    });
+
+    function closeAllLists() {
+        const suggestionItems = document.getElementsByClassName("autocomplete-items");
+        for (let i = 0; i < suggestionItems.length; i++) {
+            suggestionItems[i].parentNode.removeChild(suggestionItems[i]);
+        }
+    }
+</script>
+
+<script>
+    const cells = document.querySelectorAll("td");
+
+    cells.forEach(cell => {
+        const content = cell.textContent.trim();
+        if (content.includes("Less than") || content.includes("Before") || content.includes("Fewer")) {
+                        cell.classList.add("orange");
+        } else if (content.startsWith("Greater than") || content.startsWith("After") || content.startsWith("More")) {
+            cell.classList.add("violet");
+        } else if (content.startsWith("Not") || content.startsWith("You have lost")){
+            cell.classList.add("red");
+        } else if (content.startsWith("Previously")){
+            cell.classList.add("lightblue");
+        } else if (content.trim().length > 0){
+            cell.classList.add("green");
+        }
+    });
+</script>
+
+</body>
+</div>
+</html>
